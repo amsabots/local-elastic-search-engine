@@ -1,0 +1,38 @@
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.27
+    container_name: es
+    environment:
+      - node.name=es01
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      # Disable ES password authentication
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    deploy:
+      resources:
+        limits:
+          memory: 2GB
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - elastic
+
+volumes:
+  data01:
+    driver: local
+
+networks:
+  elastic:
+    driver: bridge
+
+
+
+#docker ps -a | grep elastic | awk '{print $1;}' | xargs docker rm -f || true && docker run --name es -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e #"xpack.security.enabled=false" -it -m 1GB  -v /home/andrew/.es01:/usr/share/elasticsearch/data docker.elastic.co/elasticsearch/elasticsearch:7.17.27
